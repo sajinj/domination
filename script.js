@@ -55,5 +55,51 @@ while (turnNumber <= 5) {
             }
         })
     })
-    turnNumber ++;
+    turnNumber++;
 }
+
+// create an array with nodes
+// let nodes = new vis.DataSet([
+//     {id: 1, label: "Node 1", color: "blue"},
+//     {id: 2, label: "Node 2", color: "blue"},
+//     {id: 3, label: "Node 3", color: "blue"},
+//     {id: 4, label: "Node 4", color: "red"},
+//     {id: 5, label: "Node 5", color: "red"},
+// ]);
+
+let nodes = new vis.DataSet([]);
+
+// create an array with edges
+// let edges = new vis.DataSet([
+//     {from: 1, to: 3},
+//     {from: 1, to: 2},
+//     {from: 2, to: 4},
+//     {from: 2, to: 5},
+//     {from: 3, to: 3},
+// ]);
+
+let edges = new vis.DataSet([]);
+Object.keys(mapConnections).forEach((f) => {
+    nodes.add({id: f, label: f, color: "green"})
+})
+
+Object.keys(mapConnections).forEach((f) => {
+    mapConnections[f].forEach((i) => {
+        edges.add({from: f, to: i})
+    })
+})
+
+
+// create a network
+let container = document.getElementById("mynetwork");
+let data = {
+    nodes: nodes,
+    edges: edges,
+};
+let options = {};
+let network = new vis.Network(container, data, options);
+
+setTimeout(function () {
+    network.setData(data);
+
+}, 1000);
