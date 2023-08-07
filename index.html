@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html lang="eng">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>domination</title>
-    <link rel="stylesheet" href="styles.css">
-    <script
-            type="text/javascript"
-            src="./library/vis-network.min.js"
-    ></script>
-</head>
-<body>
-<div id="mynetwork"></div>
-<script src="script.js"></script>
-</body>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="text/javascript" src="./library/vis-network.min.js"></script>
+  </head>
+  <body>
+    <div id="mynetwork"></div>
+    <div style="
+    width: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    ">
+      <button id="startButton">Start</button>
+      <div id="turnCounter" style="width: 100px; text-align: center;;"></div>
+      <button id="nextButton">Next</button>
+    </div>
+    <script src="script.js"></script>
+  </body>
 </html>

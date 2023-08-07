@@ -5,27 +5,91 @@ class Army {
     }
 }
 
-const factions = ['rebels', 'player1', 'player2']
+const factions = ['rebels', 'player1', 'player2', 'player3']
+
+let factionColorArray = ['gray', 'blue', 'red',
+    'green', 'yellow', 'orange', 'pink']
+
+factionColor = {}
+
+factions.forEach((f, i) => {
+    factionColor[f] = factionColorArray[i]
+});
+console.log(factionColor);
+
 let gameMap = {
-    0: new Army(factions[1], 100),
+    0: new Army(factions[1], 80),
     1: new Army(factions[0], 10),
     2: new Army(factions[0], 10),
-    3: new Army(factions[0], 10),
+    3: new Army(factions[3], 75),
     4: new Army(factions[0], 10),
-    5: new Army(factions[2], 30),
+    5: new Army(factions[2], 90),
 }
 let mapConnections = {
     0: [1, 2, 3],
-    1: [0, 2, 4],
+    1: [0, 2, 5],
     2: [0, 1, 3, 4],
     3: [0, 2, 4],
     4: [2, 3, 5],
     5: [4, 1]
 }
+
 const rewardArmy = 10
-const transferRate = 1 / 2
-let turnNumber = 1
-while (turnNumber <= 5) {
+const transferRate = 2 / 3
+
+let nodes = new vis.DataSet([]);
+let edges = new vis.DataSet([]);
+
+const options = {
+    nodes: {
+        shape: "circle",
+        physics: false,
+        scaling: {
+            min: 5,
+            max: 100,
+            label: {
+                enabled: true,
+                min: 8,
+                max: 18
+            },
+        },
+        font: {
+            color: 'white'
+        },
+    },
+    edges: {
+        width: 1,
+    },
+};
+
+Object.keys(gameMap).forEach((f) => {
+    nodes.add({
+        id: f, label: `${f}\n${gameMap[f].size}`,
+        color: factionColor[gameMap[f].faction],
+        value: gameMap[f].size,
+    })
+})
+
+Object.keys(gameMap).forEach((f) => {
+    mapConnections[f].forEach((i) => {
+        edges.add({ from: f, to: i })
+    })
+})
+
+// create a network
+let container = document.getElementById("mynetwork");
+let data = {
+    nodes: nodes,
+    edges: edges,
+};
+let network = new vis.Network(container, data, options);
+
+const turnDelay = 2000;
+const maxTurns = 15;
+let turnNumber = 1;
+
+function runTurn(autoTurn) {
+    if (turnNumber > maxTurns) return;
     factions.forEach(faction => {
         if (faction === factions[0]) return;
         let states = Object.keys(gameMap).filter(k => gameMap[k].faction === faction);
@@ -55,51 +119,42 @@ while (turnNumber <= 5) {
             }
         })
     })
+    Object.keys(gameMap).forEach(i => {
+        if (gameMap[i].faction !== factions[0])
+            gameMap[i].size += rewardArmy
+    });
+    updateUi()
     turnNumber++;
+    setTimeout(() => {
+        if(autoTurn){
+            runTurn(true)
+        }
+    }, turnDelay);
 }
 
-// create an array with nodes
-// let nodes = new vis.DataSet([
-//     {id: 1, label: "Node 1", color: "blue"},
-//     {id: 2, label: "Node 2", color: "blue"},
-//     {id: 3, label: "Node 3", color: "blue"},
-//     {id: 4, label: "Node 4", color: "red"},
-//     {id: 5, label: "Node 5", color: "red"},
-// ]);
-
-let nodes = new vis.DataSet([]);
-
-// create an array with edges
-// let edges = new vis.DataSet([
-//     {from: 1, to: 3},
-//     {from: 1, to: 2},
-//     {from: 2, to: 4},
-//     {from: 2, to: 5},
-//     {from: 3, to: 3},
-// ]);
-
-let edges = new vis.DataSet([]);
-Object.keys(mapConnections).forEach((f) => {
-    nodes.add({id: f, label: f, color: "green"})
-})
-
-Object.keys(mapConnections).forEach((f) => {
-    mapConnections[f].forEach((i) => {
-        edges.add({from: f, to: i})
-    })
-})
-
-
-// create a network
-let container = document.getElementById("mynetwork");
-let data = {
-    nodes: nodes,
-    edges: edges,
-};
-let options = {};
-let network = new vis.Network(container, data, options);
-
-setTimeout(function () {
+function updateUi() {
+    nodes.forEach(n => {
+        n.color = factionColor[gameMap[n.id].faction],
+            n.value = gameMap[n.id].size,
+            n.label = `${n.id}\n${gameMap[n.id].size}`
+    });
     network.setData(data);
+}
 
-}, 1000);
+const startButton = document.getElementById('startButton')
+const nextButton = document.getElementById('nextButton')
+const turnCounterDiv = document.getElementById('turnCounter')
+
+turnCounterDiv.innerText = `turn ${turnNumber}`
+
+startButton.addEventListener('click', function () {
+    setTimeout(() => {
+        runTurn(true)
+    }, turnDelay);
+})
+
+nextButton.addEventListener('click', function () {
+    runTurn(false)
+    turnCounterDiv.innerText = `turn ${turnNumber}`
+})
+
